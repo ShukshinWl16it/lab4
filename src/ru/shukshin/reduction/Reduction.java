@@ -1,68 +1,46 @@
 package ru.shukshin.reduction;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.BinaryOperator;
 
-interface ReductionOperation<T>{
-    T apply(List<T> list);
-    T getIdentity();
-}
-public class Reduction<T> {
-    private T identity;
-    private BinaryOperator<T> operation;
 
-    public Reduction(T identity,BinaryOperator<T> operation){
-        this.identity=identity;
-        this.operation=operation;
+public class Reduction {
+    private String name;
+    public Reduction(String name){
+        this.name=name;
     }
-
-    public T reduce(List<T> list){
-        if (list == null || list.isEmpty()) {
-            return identity;
+    public static <T> T reduce(List<T> input, T identity, BinaryOperator<T> reducer) {
+        if (reducer == null) {
+            throw new IllegalArgumentException("Reducer function cannot be null");
         }
         T result = identity;
-        for (T element : list) {
-            result = operation.apply(result, element);
+        if (input == null || input.isEmpty()) {
+            return result; // Всегда возвращаем identity для пустого списка
+        }
+        if (input != null) {
+            for (T value : input) {
+                if (value != null) {
+                    result = reducer.apply(result, value);
+                }
+            }
         }
         return result;
     }
-    public ReductionOperation<T> getOperation() {
-        // Вместо приведения типа лучше создать адаптер
-        return new ReductionOperation<T>() {
-            @Override
-            public T apply(List<T> list) {
-                return reduce(list);
-            }
 
-            @Override
-            public T getIdentity() {
-                return identity;
+    public static String arraysToString(List<int[]> arrays) {
+        String result = "[";
+        for (int i = 0; i < arrays.size(); i++) {
+            result += Arrays.toString(arrays.get(i));
+            if (i <arrays.size()-1) {
+                result += ", ";
             }
-        };
+        }
+        result += "]";
+        return result;
     }
 
-    class StringConcatenation extends Reduction<String> {
-        public StringConcatenation() {
-            super("",(starter,str)->starter+str);
-   }
-    class IntegerSum extends Reduction<Integer> {
-        public IntegerSum() {
-            super(0, Integer::sum);
-        }
+    public String toString() {
+        return "Предназначение функции сокращения: "+name;
     }
-    class ListSizeSum extends Reduction<List<Integer>>{
-        public ListSizeSum(){
-            super(0, Integer::sum);
-        }
-        public int totalElementCount(List<List<Integer>> lists) {
-            List<Integer> sizes = new ArrayList<>();
-            for (List<Integer> list : lists) {
-                sizes.add(list != null ? list.size() : 0);
-            }
-            return this.reduce(sizes);
-        }
-    }
-
 }
-
-

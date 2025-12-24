@@ -5,10 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+
 import ru.shukshin.comparable.MyNumber;
 import ru.shukshin.fillList.ListFull;
 import ru.shukshin.filter.*;
-import ru.shukshin.function.Function;
+import ru.shukshin.function.*;
+
+import ru.shukshin.reduction.Reduction;
 
 public class Main {
     public static void main(String[] args) {
@@ -51,31 +54,48 @@ public class Main {
                     System.out.println("Список: "+ ListFull.toString(intList));
                     break;
                 case 4:
-                    Function function1=new Function("Находит длины строк");
+                    Function function1 = new Function("Преобразование строк в их длины");
                     System.out.println(function1.toString());
-                    System.out.println("Начальный список: "+strings);
-                    List<Integer> lengths=Function.map(strings,s->s.length());
-                    System.out.println(lengths);
-
-                    Function function2=new Function("Меняет отрицательные значения на положительные");
-                    System.out.println(function2.toString());
-                    System.out.println("Начальный список: "+numbers);
-                    List<Integer> positive=Function.map(numbers,n->n<0 ? -n : n);
-                    System.out.println(positive);
-
-                    Function function3=new Function("Находит максимальный элемент  массиве");
-                    System.out.println(function3.toString());
-                    System.out.println("Начальные массивы:"+function3.arraysToString(arrays));
-                    List<Integer> maxValues=Function.map(arrays,arr->{
-                        int max=arr[0];
-                        for(int i=0;i<arr.length;i++){
-                            if(arr[i]>max){
-                                max=arr[i];
-                            }
+                    System.out.println("Начальный список: " + strings);
+                    List<Integer> stringLengths = Function.map(strings, new ApplyFunction<String, Integer>() {
+                        @Override
+                        public Integer apply(String value) {
+                            return value.length();
                         }
-                        return max;
                     });
-                    System.out.println(maxValues);
+                    System.out.println("Длины строк: " + stringLengths);
+
+                    Function function2 = new Function("Модуль отрицательных чисел");
+                    System.out.println(function2.toString());
+                    System.out.println("Начальный список: " + numbers);
+                    List<Integer> absNumbers = Function.map(numbers, new ApplyFunction<Integer, Integer>() {
+                        @Override
+                        public Integer apply(Integer value) {
+                            return Math.abs(value);
+                        }
+                    });
+                    System.out.println("Числа после преобразования: " + absNumbers);
+
+                    Function function3 = new Function("Максимальные значения в массивах");
+                    System.out.println(function3.toString());
+                    System.out.println("Исходные массивы: " + Function.arraysToString(arrays));
+
+                    List<Integer> maxValues = Function.map(arrays, new ApplyFunction<int[], Integer>() {
+                        @Override
+                        public Integer apply(int[] array) {
+                            if (array == null || array.length == 0) {
+                                return null; // или можно вернуть какое-то значение по умолчанию
+                            }
+                            int max = array[0];
+                            for (int i = 1; i < array.length; i++) {
+                                if (array[i] > max) {
+                                    max = array[i];
+                                }
+                            }
+                            return max;
+                        }
+                    });
+                    System.out.println("Максимальные значения: " + maxValues);
                     break;
                 case 5:
                     Filter filter1=new Filter("Удаляет строки менее трех символов");
@@ -88,11 +108,11 @@ public class Main {
                     System.out.println("Начальный список: "+strings);
                     System.out.println(bigWords);
 
-                    Filter filter2=new Filter("Удаляет все отрицательные числа");
+                    Filter filter2=new Filter("Удаляет все положительные числа");
                     System.out.println(filter2.toString());
                     List<Integer> filtNumbers = Filter.filter(numbers, new TestFilter<Integer>() {
                         public boolean test(Integer value) {
-                            return value > 0;
+                            return value < 0;
                         }
                     });
                     System.out.println("Начальный список: "+numbers);
@@ -115,8 +135,32 @@ public class Main {
 
                     break;
                 case 6:
+
+                    Reduction reduce1=new Reduction("Формирует одну большую строку");
+                    System.out.println(reduce1.toString());
+                    System.out.println("Начальный список: "+strings);
+                    String joined = Reduction.reduce(strings, "", (a, b) -> a + b);
+                    System.out.println("Объединённая строка: " + joined);
+
+                    Reduction reduce2=new Reduction("Сумма значений массива");
+                    System.out.println(reduce2.toString());
+                    System.out.println("Начальный список: "+numbers);
+                    Integer sum = Reduction.reduce(numbers, 0, Integer::sum);
+                    System.out.println("Сумма чисел: " + sum);
+
+                    Reduction reduce3=new Reduction("Сумма значений массива");
+                    System.out.println(reduce3.toString());
+                    System.out.println("Исходные массивы: "+reduce3.arraysToString(arrays));
+                    List<Integer> sizes = new ArrayList<>();
+                    for (int[] array : arrays) {
+                        sizes.add(array != null ? array.length : 0);
+                    }
+                    Integer totalCount2 = Reduction.reduce(sizes, 0, Integer::sum);
+                    System.out.println("Общее количество элементов (вариант 2): " + totalCount2);
+
                     break;
                 case 7:
+
                     break;
             }
         }while(choice!=0);

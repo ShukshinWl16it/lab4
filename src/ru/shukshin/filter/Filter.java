@@ -4,14 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-interface TestFilter<T>{
-    boolean test(T value);
-}
 public class Filter {
     private String name;
-    public Filter(){
-        this.name="Обычный фильтр";
-    }
     public Filter(String name){
         this.name=name;
     }
